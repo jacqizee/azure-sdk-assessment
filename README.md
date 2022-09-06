@@ -26,3 +26,9 @@ The premise of this assessment is that:
   - No more than one backup per day for backups made in the last 7 days
   - No more than one backup per week for backups made prior to the last 7 days
 - When removing backups, always keep the most recent one that still fits
+
+## Documentation
+Pages I found useful (saving here for easy access haha)
+- Overview: https://docs.microsoft.com/en-us/azure/developer/python/sdk/azure-sdk-overview
+- azure-mgmt-compute: https://docs.microsoft.com/en-us/python/api/azure-mgmt-compute/azure.mgmt.compute?view=azure-python
+  - ComputeManagementClient: https://docs.microsoft.com/en-us/python/api/azure-mgmt-compute/azure.mgmt.compute.computemanagementclient?view=azure-python
