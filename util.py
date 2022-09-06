@@ -21,14 +21,14 @@ def fetch_vms(resource_group, subscription_id):
 
 def fetch_disks(resource_group, subscription_id):
     compute_client = create_client(subscription_id)
-    disks = [vm for vm in compute_client.disks.list_by_resource_group(resource_group_name=resource_group)]
+    disks = [vm for vm in compute_client.disks.list_by_resource_group(resource_group)]
 
     return disks
 
 
 def fetch_snapshots(resource_group, subscription_id):
     compute_client = create_client(subscription_id)
-    snapshots = [snapshot for snapshot in compute_client.snapshots.list_by_resource_group(resource_group_name=resource_group)]
+    snapshots = [snapshot for snapshot in compute_client.snapshots.list_by_resource_group(resource_group)]
 
     return snapshots
 
@@ -41,7 +41,3 @@ def fetch_snapshot_dates(resource_group, subscription_id):
         date_extraction[snapshot.creation_data.source_resource_id.split('/')[-1]] = snapshot.time_created
 
     return date_extraction
-
-
-if __name__ == '__main__':
-    print(argv)

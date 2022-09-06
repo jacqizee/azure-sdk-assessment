@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import util
 
 # Logger
-logging.basicConfig(format='%(asctime)s %(levelname)s   %(message)s', level=logging.INFO)
+# logging.basicConfig(format='%(asctime)s %(levelname)s   %(message)s', level=logging.INFO)
 
 # Constants
 SUB_ID = "31169275-2308-4cdd-8d7a-f39ffd65bbf8"
