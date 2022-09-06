@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 azure-mgmt-compute = "*"
 azure-identity = "*"
+tabulate = "*"
 
 [dev-packages]
 

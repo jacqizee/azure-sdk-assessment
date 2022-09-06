@@ -1,9 +1,10 @@
-from azure.core.exceptions import HttpResponseError
 import logging
 import argparse
+from tabulate import tabulate
+import util
+
 from sys import argv
 from datetime import datetime, timedelta
-import util
 
 # Logger
 # logging.basicConfig(format='%(asctime)s %(levelname)s   %(message)s', level=logging.INFO)
@@ -17,33 +18,45 @@ def list_vms(zone):
     client = util.create_client(SUB_ID)
     vms = client.virtual_machines.list_by_location(zone)
     dates = util.fetch_snapshot_dates(RSRC_GROUP, SUB_ID)
+    print_data = []
 
     for vm in vms:
-        print(
-            f'''
-            Instance: {vm.name}
-            Backup Enabled: {vm.tags['backup']}
-            Disk: {vm.storage_profile.os_disk.name}
-            Last Backup: {dates[vm.name].strftime('%Y-%m-%d %H:%M:%S.%f-%z') if vm.tags['backup'] == 'true' else 'Never' }
-            '''
-        )
+        print_data.append([
+            vm.name,
+            vm.tags['backup'],
+            vm.storage_profile.os_disk.name,
+            dates[vm.name].strftime('%Y-%m-%d %H:%M:%S.%f-%z') if vm.name in dates else 'Never'
+        ])
+
+    print(tabulate(print_data, headers=['Instance', 'Backup Enabled', 'Disk', 'Last Backup']))
 
 # Create Snapshots for VMs where backup = true
+    # Only if last backup was not done today
 def create_snapshots():
     client = util.create_client(SUB_ID)
     disks = util.fetch_disks(RSRC_GROUP, SUB_ID)
     dates = util.fetch_snapshot_dates(RSRC_GROUP, SUB_ID)
 
-    logging.info('Starting backup process')
+    print('🚀 Starting backup process')
 
+    # Iterate through disks, checking if a backup is necessary and creating snapshot if so
     for disk in disks:
-        logging.info(f'Instance: {disk.name}')
+        print(f'Instance: {disk.name}')
+
+        # Only execute if backup tag is true
         if disk.tags['backup'] == 'true':
-            logging.info('Backup Enabled: True')
-            logging.info(f'Last backup was {dates[disk.name]}')
+            print('Backup Enabled: True')
+            print(f'Last backup was {dates[disk.name]}')
+            
+            # Check date of snapshot against today's date
             if dates[disk.name].date() != datetime.today().date():
-                logging.info(f'Backing up disk {disk.name}')
-                async_snapshot_deletion = client.snapshots.begin_delete(RSRC_GROUP, str(disk.name) + '-snapshot')
+                print(f'⏳ Backing up disk {disk.name}')
+                
+                # Delete old snapshot if one exists
+                if (disk.name in dates):
+                    async_snapshot_deletion = client.snapshots.begin_delete(RSRC_GROUP, str(disk.name) + '-snapshot')
+                
+                # Create new snapshot
                 async_snapshot_creation = client.snapshots.begin_create_or_update(
                     RSRC_GROUP,
                     str(disk.name) + '-snapshot',
@@ -55,19 +68,20 @@ def create_snapshots():
                         },
                     }
                 )
-                snapshot = async_snapshot_creation.result()
-                logging.info('Backup completed')
+                # snapshot = async_snapshot_creation.result()
+                print('Backup completed')
             else:
-                logging.info('Skipping backup creation since the last backup is too recent')
+                print('Skipping backup creation since the last backup is too recent')
         else:
-            logging.info('Backup Enabled: False')
-            logging.info('Skipping backup creation since backups are not enabled')
-    logging.info('All snapshots done')
+            print('Backup Enabled: False')
+            print('Skipping backup creation since backups are not enabled')
+    print('✅ All snapshots done')
 
 # Remove Old Backups
-    # (1) no more than 1 per day for those made in the last 7 days
-    # (2) no more than 1 per week for those made prior to the last 7 days
-    # (3) always keep the most recent backup
+    # Retention Policy:
+        # (1) no more than 1 per day for those made in the last 7 days
+        # (2) no more than 1 per week for those made prior to the last 7 days
+        # (3) always keep the most recent backup
 def remove_old_backups():
     client = util.create_client(SUB_ID)
     snapshots = util.fetch_snapshots(RSRC_GROUP, SUB_ID)
@@ -80,7 +94,7 @@ def remove_old_backups():
         # Get the iso week and weekday number for the snapshot
         year, week, weekday = date_created.isocalendar()
 
-        # Sort the 
+        # Sort into either Older or Recent status
         if date_created.date() > datetime.today().date() + timedelta(days=7):
             disk_id = disk_id + '- Older'
             key = week
@@ -88,6 +102,7 @@ def remove_old_backups():
             disk_id = disk_id + '- Recent'
             key = weekday
 
+        # Delete older snapshots according to retention policy
         if disk_id in disks:
             if key not in disks[disk_id]:
                 disks[disk_id] = key
