@@ -20,6 +20,7 @@ def list_vms(zone):
     dates = util.fetch_snapshot_dates(RSRC_GROUP, SUB_ID)
     print_data = []
 
+    #  Iterate through VMs, appending print data so we can tabulate
     for vm in vms:
         print_data.append([
             vm.name,
@@ -28,6 +29,7 @@ def list_vms(zone):
             dates[vm.name].strftime('%Y-%m-%d %H:%M:%S.%f-%z') if vm.name in dates else 'Never'
         ])
 
+    # Print tabulated data
     print(tabulate(print_data, headers=['Instance', 'Backup Enabled', 'Disk', 'Last Backup']))
 
 # Create Snapshots for VMs where backup = true
