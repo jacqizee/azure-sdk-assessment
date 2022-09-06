@@ -1,4 +1,4 @@
-# Azure SDK Assessment
+# Assessment Using Azure SDK
 This is an technical assessment for a role I've applied for that requires using Azure SDK
 
 ## Timeframe
