@@ -11,7 +11,7 @@ The premise of this assessment is that:
   - You are asked to automate this task using Python and the azure-mgmt-compute
   
  ### User Story 1
- - List the VMs in a zone. Should print:
+- List the VMs in a zone. Should print:
   - Name of the VM instance
   - If backups are enabled
   - Name of the first disk
