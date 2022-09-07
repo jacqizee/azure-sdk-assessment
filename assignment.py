@@ -3,7 +3,6 @@ import argparse
 from tabulate import tabulate
 import util
 
-from sys import argv
 from datetime import datetime, timedelta
 
 # Logger
@@ -38,6 +37,7 @@ def create_snapshots():
     client = util.create_client(SUB_ID)
     disks = util.fetch_disks(RSRC_GROUP, SUB_ID)
     dates = util.fetch_snapshot_dates(RSRC_GROUP, SUB_ID)
+    print(dates)
 
     print('🚀 Starting backup process')
 
@@ -56,7 +56,7 @@ def create_snapshots():
                 
                 # Delete old snapshot if one exists
                 if (disk.name in dates):
-                    async_snapshot_deletion = client.snapshots.begin_delete(RSRC_GROUP, str(disk.name) + '-snapshot')
+                    async_snapshot_deletion = client.snapshots.begin_delete(RSRC_GROUP, str(disk.name) + '-snapshotrt')
                 
                 # Create new snapshot
                 async_snapshot_creation = client.snapshots.begin_create_or_update(
@@ -107,19 +107,17 @@ def remove_old_backups():
         # Delete older snapshots according to retention policy
         if disk_id in disks:
             if key not in disks[disk_id]:
-                disks[disk_id] = key
-            elif snapshot.time_created > disks[disk_id][key].time_created:
-                to_delete = disks[disk_id][key].name
-            else:
-                to_delete = snapshot.name
                 disks[disk_id][key] = snapshot
-            client.snapshots.begin_delete(RSRC_GROUP, to_delete)
-            logging.info(f'Deleting snapshot {to_delete}')
+            else:
+                if snapshot.time_created > disks[disk_id][key].time_created:
+                    to_delete = disks[disk_id][key].name
+                    disks[disk_id][key] = snapshot
+                else:
+                    to_delete = snapshot.name
+                client.snapshots.begin_delete(RSRC_GROUP, to_delete)
+                print(f'Deleting snapshot {to_delete}')
         else:
             disks[disk_id] = { key: snapshot }
-
-
-
 
 
 if __name__ == '__main__':
