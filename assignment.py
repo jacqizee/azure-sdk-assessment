@@ -13,6 +13,10 @@ SUB_ID = "31169275-2308-4cdd-8d7a-f39ffd65bbf8"
 RSRC_GROUP = "XCC-ASSESSMENT-JACQUELINE"
 
 # List VMs by Zone
+    # instance name
+    # backup enabled?
+    # disk name
+    # last backup (if enabled)
 def list_vms(zone):
     client = util.create_client(SUB_ID)
     vms = client.virtual_machines.list_by_location(zone)
@@ -39,7 +43,6 @@ def create_snapshots():
     client = util.create_client(SUB_ID)
     disks = util.fetch_disks(RSRC_GROUP, SUB_ID)
     dates = util.fetch_snapshot_dates(RSRC_GROUP, SUB_ID)
-    print(dates)
 
     print('🚀 Starting backup process')
 
@@ -101,7 +104,7 @@ def remove_old_backups():
         year, week, weekday = date_created.isocalendar()
 
         # Sort into either Older or Recent status
-        if date_created.date() > datetime.today().date() + timedelta(days=7):
+        if date_created.date() < datetime.today().date() - timedelta(days=7):
             disk_id = disk_id + '- Older'
             key = week
         else:
