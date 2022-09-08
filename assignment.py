@@ -60,8 +60,8 @@ def create_snapshots():
                 print(f'⏳ Backing up disk {disk.name}')
                 
                 # Delete old snapshot if one exists
-                if (disk.name in dates):
-                    async_snapshot_deletion = client.snapshots.begin_delete(RSRC_GROUP, str(disk.name) + '-snapshot')
+                # if (disk.name in dates):
+                #     async_snapshot_deletion = client.snapshots.begin_delete(RSRC_GROUP, str(disk.name) + '-snapshot')
                 
                 # Create new snapshot
                 async_snapshot_creation = client.snapshots.begin_create_or_update(
@@ -111,7 +111,7 @@ def remove_old_backups():
             disk_id = disk_id + '- Recent'
             key = weekday
 
-        # Delete older snapshots according to retention policy
+        # Delete snapshots according to retention policy
         if disk_id in disks:
             if key not in disks[disk_id]:
                 disks[disk_id][key] = snapshot
