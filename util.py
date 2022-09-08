@@ -1,9 +1,5 @@
-from sys import argv
 from azure.mgmt.compute import ComputeManagementClient
 from azure.identity import AzureCliCredential
-
-SUB_ID = "31169275-2308-4cdd-8d7a-f39ffd65bbf8"
-RSRC_GROUP = "XCC-ASSESSMENT-JACQUELINE"
 
 def create_client(subscription_id):
     credential = AzureCliCredential()

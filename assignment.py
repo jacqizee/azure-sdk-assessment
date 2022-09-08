@@ -1,9 +1,9 @@
+import util
+from datetime import datetime, timedelta
+
 import logging
 import argparse
 from tabulate import tabulate
-import util
-
-from datetime import datetime, timedelta
 
 # Logger
 # logging.basicConfig(format='%(asctime)s %(levelname)s   %(message)s', level=logging.INFO)
@@ -31,6 +31,8 @@ def list_vms(zone):
     # Print tabulated data
     print(tabulate(print_data, headers=['Instance', 'Backup Enabled', 'Disk', 'Last Backup']))
 
+
+
 # Create Snapshots for VMs where backup = true
     # Only if last backup was not done today
 def create_snapshots():
@@ -56,7 +58,7 @@ def create_snapshots():
                 
                 # Delete old snapshot if one exists
                 if (disk.name in dates):
-                    async_snapshot_deletion = client.snapshots.begin_delete(RSRC_GROUP, str(disk.name) + '-snapshotrt')
+                    async_snapshot_deletion = client.snapshots.begin_delete(RSRC_GROUP, str(disk.name) + '-snapshot')
                 
                 # Create new snapshot
                 async_snapshot_creation = client.snapshots.begin_create_or_update(
@@ -78,6 +80,8 @@ def create_snapshots():
             print('Backup Enabled: False')
             print('Skipping backup creation since backups are not enabled')
     print('✅ All snapshots done')
+
+
 
 # Remove Old Backups
     # Retention Policy:
